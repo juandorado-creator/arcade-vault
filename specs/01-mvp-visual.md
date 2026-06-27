@@ -1,7 +1,7 @@
 ---
 id: 01-mvp-visual
 title: MVP Visual — Todas las Pantallas
-state: Aprobado
+state: Implementado
 date: 2026-06-27
 depends_on: []
 objective: Implementar en Next.js las 5 pantallas visuales de Arcade Vault (Biblioteca, Detalle, Reproductor, Auth, Salón de la Fama) y la Nav compartida, fielmente al diseño de las plantillas de referencia, sin lógica de juego real.
