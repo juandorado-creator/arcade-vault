@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "spec": {
+      "source": "Klerith/fernando-skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/spec/SKILL.md",
+      "computedHash": "ebf0bbf4ef0ed64377a63d41f0766b1cd192a0b98c4445b69a906bb247be0732"
+    },
+    "spec-impl": {
+      "source": "Klerith/fernando-skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/spec-impl/SKILL.md",
+      "computedHash": "bbc0091a723269d3c896360f519e7f15c0d4ce24918a23271214a70db15e7755"
+    }
+  }
+}
