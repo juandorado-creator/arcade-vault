@@ -1,7 +1,7 @@
 ---
 id: 02-home-page
 title: Home Page — Landing Page
-state: aprobado
+state: implementado
 date: 2026-06-28
 depends_on: [01-mvp-visual]
 objective: Implementar la landing page de Arcade Vault en la ruta raíz `/`, mover la Biblioteca a `/biblioteca`, y actualizar la Nav para reflejar la estructura de navegación de la referencia.
