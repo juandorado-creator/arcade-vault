@@ -10,7 +10,8 @@ export default function Nav() {
   const router = useRouter()
 
   const isActive = (href: string) => {
-    if (href === '/') return pathname === '/' || pathname.startsWith('/juego')
+    if (href === '/') return pathname === '/'
+    if (href === '/biblioteca') return pathname.startsWith('/biblioteca') || pathname.startsWith('/juego')
     return pathname.startsWith(href)
   }
 
@@ -27,8 +28,10 @@ export default function Nav() {
           <div className="logo-text neon-cyan">ARCADE <span className="neon-magenta">VAULT</span></div>
         </div>
         <div className="links">
-          <Link href="/" className={isActive('/') ? 'active' : ''}>Biblioteca</Link>
+          <Link href="/" className={isActive('/') ? 'active' : ''}>Inicio</Link>
+          <Link href="/biblioteca" className={isActive('/biblioteca') ? 'active' : ''}>Biblioteca</Link>
           <Link href="/salon" className={isActive('/salon') ? 'active' : ''}>Salón de la Fama</Link>
+          <Link href="/about" className={isActive('/about') ? 'active' : ''}>Acerca de</Link>
         </div>
         <div className="spacer"></div>
         <div className="coin-counter">
@@ -42,8 +45,10 @@ export default function Nav() {
       <div className={'av-mobile-backdrop' + (open ? ' open' : '')} onClick={() => setOpen(false)}></div>
       <aside className={'av-mobile-panel' + (open ? ' open' : '')}>
         <div className="pixel neon-cyan" style={{ fontSize: 11, marginBottom: 16 }}>MENÚ</div>
-        <a className={isActive('/') ? 'active' : ''} onClick={() => go('/')}>Biblioteca</a>
+        <a className={isActive('/') ? 'active' : ''} onClick={() => go('/')}>Inicio</a>
+        <a className={isActive('/biblioteca') ? 'active' : ''} onClick={() => go('/biblioteca')}>Biblioteca</a>
         <a className={isActive('/salon') ? 'active' : ''} onClick={() => go('/salon')}>Salón de la Fama</a>
+        <a className={isActive('/about') ? 'active' : ''} onClick={() => go('/about')}>Acerca de</a>
         <a className={isActive('/auth') ? 'active' : ''} onClick={() => go('/auth')}>Iniciar Sesión</a>
         <div style={{ flex: 1 }}></div>
         <div className="pixel" style={{ fontSize: 9, color: 'var(--ink-faint)', letterSpacing: '0.16em' }}>CRÉDITOS · 03</div>
