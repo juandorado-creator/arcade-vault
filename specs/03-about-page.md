@@ -1,7 +1,7 @@
 ---
 id: 03-about-page
 title: About Page + Envío de Correo
-state: aprobado
+state: implementado
 date: 2026-06-28
 depends_on: [02-home-page]
 objective: Crear la página `/about` con la sección "Acerca de" y el formulario de contacto que envía correos reales mediante Resend.
