@@ -11,6 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 No test runner is configured yet.
 
 ## Skill
+
 Usa siempre /frontend-design para diseña la interfaz de usuario.
 
 ## Stack
