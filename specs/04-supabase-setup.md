@@ -1,7 +1,7 @@
 ---
 id: 04-supabase-setup
 title: Integración base de Supabase
-state: aprobado
+state: implementado
 date: 2026-06-29
 depends_on: [03-about-page]
 objective: Instalar y configurar @supabase/ssr como infraestructura base de la app, incluyendo clientes de servidor y cliente, middleware de sesión, y Supabase Auth habilitado — sin UI de autenticación.
@@ -70,14 +70,14 @@ objective: Instalar y configurar @supabase/ssr como infraestructura base de la a
 
 ## Criterios de aceptación
 
-- [ ] `@supabase/ssr` y `@supabase/supabase-js` están en `package.json` > dependencies
-- [ ] `.env.local` contiene `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- [ ] `lib/supabase/server.ts` exporta un cliente de servidor y `getUser()` sin errores de TypeScript
-- [ ] `lib/supabase/client.ts` exporta `createBrowserClient` sin errores de TypeScript
-- [ ] `middleware.ts` existe en la raíz, refresca el token en cada request y excluye assets estáticos
-- [ ] El servidor arranca sin errores tras añadir el middleware
-- [ ] Al cargar `/`, la consola del servidor muestra `[Supabase] user: null` sin lanzar excepciones
-- [ ] Ninguna ruta existente (`/`, `/biblioteca`, `/about`) se rompe tras la integración
+- [x] `@supabase/ssr` y `@supabase/supabase-js` están en `package.json` > dependencies
+- [x] `.env.local` contiene `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (se usó publishable key en lugar de anon key)
+- [x] `lib/supabase/server.ts` exporta un cliente de servidor y `getUser()` sin errores de TypeScript
+- [x] `lib/supabase/client.ts` exporta `createBrowserClient` sin errores de TypeScript
+- [x] `middleware.ts` existe en la raíz, refresca el token en cada request y excluye assets estáticos
+- [x] El servidor arranca sin errores tras añadir el middleware
+- [x] Al cargar `/`, la consola del servidor muestra `[Supabase] user: null` sin lanzar excepciones
+- [x] Ninguna ruta existente (`/`, `/biblioteca`, `/about`) se rompe tras la integración
 
 ## Decisiones tomadas y descartadas
 
