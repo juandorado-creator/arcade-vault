@@ -1,37 +1,36 @@
-'use client'
-
-import { useState, useMemo, useRef } from 'react'
-import { useRouter } from 'next/navigation'
-import { GAMES, CATS, type Game, type GameCategory } from '@/app/data'
-
+'use client';
+import { useState, useMemo, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { GAMES, CATS, type Game, type GameCategory } from '@/app/data';
 function GameCard({ game }: { game: Game }) {
-  const router = useRouter()
-  const tiltRef = useRef<HTMLDivElement>(null)
-
+  const router = useRouter();
+  const tiltRef = useRef<HTMLDivElement>(null);
   const onMove = (e: React.MouseEvent) => {
-    const el = tiltRef.current
-    if (!el) return
-    const r = el.getBoundingClientRect()
-    const px = (e.clientX - r.left) / r.width - 0.5
-    const py = (e.clientY - r.top) / r.height - 0.5
-    el.style.transform = `translateY(-6px) rotateX(${-py * 6}deg) rotateY(${px * 8}deg)`
-  }
-
+    const el = tiltRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    el.style.transform = `translateY(-6px) rotateX(${-py * 6}deg) rotateY(${px * 8}deg)`;
+  };
   const onLeave = () => {
-    const el = tiltRef.current
-    if (!el) return
-    el.style.transform = ''
-  }
-
-  const btnClass = game.color === 'magenta' ? 'btn magenta' : game.color === 'yellow' ? 'btn yellow' : 'btn'
-
+    const el = tiltRef.current;
+    if (!el) return;
+    el.style.transform = '';
+  };
+  const btnClass =
+    game.color === 'magenta'
+      ? 'btn magenta'
+      : game.color === 'yellow'
+        ? 'btn yellow'
+        : 'btn';
   return (
     <div
       ref={tiltRef}
       className="card"
       onMouseMove={onMove}
       onMouseLeave={onLeave}
-      onClick={() => router.push(`/juego/${game.id}`)}
+      onClick={() => router.push(game.href ?? `/juego/${game.id}`)}
     >
       <div className="cover">
         <div className={'cover-bg ' + game.cover}></div>
@@ -47,33 +46,36 @@ function GameCard({ game }: { game: Game }) {
           </div>
           <button
             className={btnClass}
-            onClick={(e) => { e.stopPropagation(); router.push(`/juego/${game.id}`) }}
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(game.href ?? `/juego/${game.id}`);
+            }}
           >
             JUGAR
           </button>
         </div>
       </div>
     </div>
-  )
+  );
 }
-
 export default function Biblioteca() {
-  const [q, setQ] = useState('')
-  const [cat, setCat] = useState<GameCategory>('TODOS')
-
+  const [q, setQ] = useState('');
+  const [cat, setCat] = useState<GameCategory>('TODOS');
   const filtered = useMemo(() => {
     return GAMES.filter(
-      g => (cat === 'TODOS' || g.cat === cat) && g.title.toLowerCase().includes(q.toLowerCase())
-    )
-  }, [q, cat])
-
+      (g) =>
+        (cat === 'TODOS' || g.cat === cat) &&
+        g.title.toLowerCase().includes(q.toLowerCase()),
+    );
+  }, [q, cat]);
   return (
     <div className="fade-in">
       <section className="av-hero">
         <h1 className="flicker">ARCADE VAULT</h1>
-        <div className="sub">INSERTA UNA MONEDA PARA JUGAR <span className="blink">_</span></div>
+        <div className="sub">
+          INSERTA UNA MONEDA PARA JUGAR <span className="blink">_</span>
+        </div>
       </section>
-
       <div className="av-filters">
         <div className="av-search">
           <span className="ico">⌕</span>
@@ -84,7 +86,7 @@ export default function Biblioteca() {
           />
         </div>
         <div className="av-chips">
-          {CATS.map(c => (
+          {CATS.map((c) => (
             <button
               key={c}
               className={'chip' + (cat === c ? ' active' : '')}
@@ -95,18 +97,33 @@ export default function Biblioteca() {
           ))}
         </div>
       </div>
-
       <div className="av-grid">
-        {filtered.map(g => (
+        {filtered.map((g) => (
           <GameCard key={g.id} game={g} />
         ))}
         {filtered.length === 0 && (
-          <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 80, color: 'var(--ink-faint)' }}>
-            <div className="pixel" style={{ fontSize: 14, color: 'var(--magenta)', marginBottom: 12 }}>NO HAY RESULTADOS</div>
+          <div
+            style={{
+              gridColumn: '1 / -1',
+              textAlign: 'center',
+              padding: 80,
+              color: 'var(--ink-faint)',
+            }}
+          >
+            <div
+              className="pixel"
+              style={{
+                fontSize: 14,
+                color: 'var(--magenta)',
+                marginBottom: 12,
+              }}
+            >
+              NO HAY RESULTADOS
+            </div>
             <div>Intenta otra búsqueda o categoría.</div>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }

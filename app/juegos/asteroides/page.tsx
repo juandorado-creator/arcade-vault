@@ -1,15 +1,46 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 export default function AsteroidsPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pausedRef = useRef(false);
+  const forceEndRef = useRef(false);
+  const restartRef = useRef<(() => void) | null>(null);
+  const router = useRouter();
+  const [score, setScore] = useState(0);
+  const [lives, setLives] = useState(3);
+  const [level, setLevel] = useState(1);
+  const [paused, setPaused] = useState(false);
+  const [over, setOver] = useState(false);
+  const [finalScore, setFinalScore] = useState(0);
+  const [saved, setSaved] = useState(false);
+  const togglePause = useCallback(() => {
+    setPaused((p) => {
+      pausedRef.current = !p;
+      return !p;
+    });
+  }, []);
+  const handleFin = useCallback(() => {
+    forceEndRef.current = true;
+  }, []);
+  const handleRestart = useCallback(() => {
+    forceEndRef.current = false;
+    setScore(0);
+    setLives(3);
+    setLevel(1);
+    setOver(false);
+    setSaved(false);
+    pausedRef.current = false;
+    setPaused(false);
+    restartRef.current?.();
+  }, []);
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    // ── Adaptación: canvas vía ref en lugar de getElementById ─────────────────
     const ctx = canvas.getContext('2d')!;
     const W = 800;
     const H = 600;
-    // ── Input ─────────────────────────────────────────────────────────────────
+    // ── Input ────────────────────────────────────────────────────────────────
     const keys: Record<string, boolean> = {};
     const justPressed: Record<string, boolean> = {};
     function onKeyDown(e: KeyboardEvent) {
@@ -26,7 +57,7 @@ export default function AsteroidsPage() {
       justPressed[code] = false;
       return val;
     }
-    // ── Utils ─────────────────────────────────────────────────────────────────
+    // ── Utils ────────────────────────────────────────────────────────────────
     const wrap = (v: number, max: number) => ((v % max) + max) % max;
     const dist = (a: { x: number; y: number }, b: { x: number; y: number }) =>
       Math.hypot(a.x - b.x, a.y - b.y);
@@ -34,12 +65,12 @@ export default function AsteroidsPage() {
       min + Math.random() * (max - min);
     const randInt = (min: number, max: number) =>
       Math.floor(rand(min, max + 1));
-    // ── Constants ─────────────────────────────────────────────────────────────
+    // ── Constants ────────────────────────────────────────────────────────────
     const POWERUP_DROP_CHANCE = 0.15;
     const POWERUP_DURATION = 5;
     const POWERUP_TTL = 12;
     const TRIPLE_SPREAD = 0.18;
-    // ── Bullet ────────────────────────────────────────────────────────────────
+    // ── Bullet ───────────────────────────────────────────────────────────────
     class Bullet {
       x: number;
       y: number;
@@ -71,7 +102,7 @@ export default function AsteroidsPage() {
         ctx.fill();
       }
     }
-    // ── Asteroid ──────────────────────────────────────────────────────────────
+    // ── Asteroid ─────────────────────────────────────────────────────────────
     const RADII = [0, 16, 30, 50];
     const SPEEDS = [0, 85, 55, 32];
     const POINTS = [0, 100, 50, 20];
@@ -134,7 +165,7 @@ export default function AsteroidsPage() {
         ctx.restore();
       }
     }
-    // ── PowerUp ───────────────────────────────────────────────────────────────
+    // ── PowerUp ──────────────────────────────────────────────────────────────
     class PowerUp {
       x: number;
       y: number;
@@ -178,7 +209,7 @@ export default function AsteroidsPage() {
         ctx.fillText('3x', this.x, this.y);
       }
     }
-    // ── Ship ──────────────────────────────────────────────────────────────────
+    // ── Ship ─────────────────────────────────────────────────────────────────
     class Ship {
       tripleShot: number;
       x: number;
@@ -279,7 +310,7 @@ export default function AsteroidsPage() {
         ctx.restore();
       }
     }
-    // ── Partículas ────────────────────────────────────────────────────────────
+    // ── Partículas ───────────────────────────────────────────────────────────
     class Particle {
       x: number;
       y: number;
@@ -315,17 +346,18 @@ export default function AsteroidsPage() {
         ctx.stroke();
       }
     }
-    // ── Estado del juego ──────────────────────────────────────────────────────
+    // ── Estado del juego ─────────────────────────────────────────────────────
     let ship: Ship,
       bullets: Bullet[],
       asteroids: Asteroid[],
       particles: Particle[],
       powerUps: PowerUp[];
-    let score: number, lives: number, level: number;
+    let score = 0,
+      lives = 3,
+      level = 1;
     let state: 'playing' | 'dead' | 'gameover';
     let deadTimer: number;
-    let powerUpSpawned: boolean;
-    let killsSinceSpawn: number;
+    let powerUpSpawned: boolean, killsSinceSpawn: number;
     function spawnAsteroids(count: number) {
       const SAFE_DIST = 130;
       for (let i = 0; i < count; i++) {
@@ -375,10 +407,9 @@ export default function AsteroidsPage() {
         deadTimer = 2;
       }
     }
-    // ── Update ────────────────────────────────────────────────────────────────
+    // ── Update ───────────────────────────────────────────────────────────────
     function update(dt: number) {
       if (state === 'gameover') {
-        if (pressed('Space')) initGame();
         particles.forEach((p) => p.update(dt));
         particles = particles.filter((p) => !p.dead);
         return;
@@ -441,46 +472,7 @@ export default function AsteroidsPage() {
       }
       if (asteroids.length === 0) nextLevel();
     }
-    // ── Draw ──────────────────────────────────────────────────────────────────
-    function drawLifeIcon(x: number, y: number) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(-Math.PI / 2);
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 1.2;
-      ctx.lineJoin = 'round';
-      ctx.beginPath();
-      ctx.moveTo(9, 0);
-      ctx.lineTo(-6, -5);
-      ctx.lineTo(-3, 0);
-      ctx.lineTo(-6, 5);
-      ctx.closePath();
-      ctx.stroke();
-      ctx.restore();
-    }
-    function drawHUD() {
-      ctx.fillStyle = '#fff';
-      ctx.font = '15px monospace';
-      ctx.textAlign = 'left';
-      ctx.fillText(`SCORE  ${score}`, 14, 26);
-      ctx.textAlign = 'center';
-      ctx.fillText(`NIVEL ${level}`, W / 2, 26);
-      for (let i = 0; i < lives; i++) drawLifeIcon(W - 16 - i * 22, 18);
-      if (ship.tripleShot > 0) {
-        ctx.textAlign = 'left';
-        ctx.fillStyle = '#0ff';
-        ctx.fillText(`3x  ${ship.tripleShot.toFixed(1)}s`, 14, 46);
-      }
-    }
-    function drawOverlay(title: string, sub: string) {
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 46px monospace';
-      ctx.fillText(title, W / 2, H / 2 - 18);
-      ctx.font = '18px monospace';
-      ctx.fillStyle = 'rgba(255,255,255,0.65)';
-      ctx.fillText(sub, W / 2, H / 2 + 22);
-    }
+    // ── Draw ─────────────────────────────────────────────────────────────────
     function draw() {
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, W, H);
@@ -489,24 +481,42 @@ export default function AsteroidsPage() {
       powerUps.forEach((p) => p.draw());
       bullets.forEach((b) => b.draw());
       ship.draw();
-      drawHUD();
-      if (state === 'gameover')
-        drawOverlay(
-          'GAME OVER',
-          `PUNTAJE: ${score}   —   ESPACIO PARA REINICIAR`,
-        );
     }
-    // ── Loop principal ────────────────────────────────────────────────────────
+    // ── Loop principal ───────────────────────────────────────────────────────
     let lastTime: number | null = null;
     let rafId: number;
+    let lastLives = 3;
+    let lastScore = 0;
+    let lastLevel = 1;
     function loop(ts: number) {
       const dt = lastTime === null ? 0 : Math.min((ts - lastTime) / 1000, 0.05);
       lastTime = ts;
-      update(dt);
+      if (forceEndRef.current && state !== 'gameover') {
+        state = 'gameover';
+      }
+      if (!pausedRef.current) update(dt);
       draw();
+      // Sync to React — setState is a no-op when value is unchanged (React.is)
+      if (score !== lastScore) {
+        setScore(score);
+        lastScore = score;
+      }
+      if (lives !== lastLives) {
+        setLives(lives);
+        lastLives = lives;
+      }
+      if (level !== lastLevel) {
+        setLevel(level);
+        lastLevel = level;
+      }
+      if (state === 'gameover') {
+        setFinalScore(score);
+        setOver(true);
+      }
       rafId = requestAnimationFrame(loop);
     }
     initGame();
+    restartRef.current = initGame;
     rafId = requestAnimationFrame(loop);
     return () => {
       cancelAnimationFrame(rafId);
@@ -515,34 +525,155 @@ export default function AsteroidsPage() {
     };
   }, []);
   return (
-    <main className="min-h-screen bg-black flex items-center justify-center">
-      {/* Aviso mobile — visible solo en pantallas < 768px */}
-      <div className="md:hidden flex flex-col items-center gap-4 px-8 text-center">
-        <span className="text-4xl">🕹️</span>
-        <p
-          className="text-white font-mono text-sm leading-relaxed"
-          style={{ fontFamily: 'var(--mono)' }}
-        >
-          Este juego requiere teclado.
-          <br />
-          Ábrelo desde un escritorio.
-        </p>
+    <div className="av-player fade-in">
+      {/* ── HUD ────────────────────────────────────────────────────────────── */}
+      <div className="player-hud">
+        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+          <div className="hud-stat">
+            <div className="l">Jugador</div>
+            <div className="v" style={{ color: 'var(--ink)' }}>
+              INVITADO
+            </div>
+          </div>
+          <div className="hud-stat">
+            <div className="l">Puntuación</div>
+            <div className="v">{score.toLocaleString('es-ES')}</div>
+          </div>
+          <div className="hud-stat lives">
+            <div className="l">Vidas</div>
+            <div className="v">
+              {'♥ '.repeat(Math.max(0, lives)).trim() || '—'}
+            </div>
+          </div>
+          <div className="hud-stat level">
+            <div className="l">Nivel</div>
+            <div className="v">{String(level).padStart(2, '0')}</div>
+          </div>
+        </div>
+        <div className="hud-actions">
+          <button className="btn yellow" onClick={togglePause}>
+            {paused ? 'REANUDAR' : 'PAUSA'}
+          </button>
+          <button className="btn magenta" onClick={handleFin}>
+            FIN
+          </button>
+          <button
+            className="btn ghost"
+            onClick={() => router.push('/biblioteca')}
+          >
+            SALIR
+          </button>
+        </div>
       </div>
-      {/* Canvas — oculto en pantallas < 768px */}
-      <div
-        className="hidden md:block overflow-x-auto"
-        style={{ lineHeight: 0 }}
-      >
-        <canvas
-          ref={canvasRef}
-          width={800}
-          height={600}
-          style={{
-            display: 'block',
-            boxShadow: '0 0 40px rgba(0,245,255,0.15)',
-          }}
-        />
+      {/* ── CRT ────────────────────────────────────────────────────────────── */}
+      <div className="crt">
+        <div className="crt-screen">
+          {/* Canvas — oculto en móvil */}
+          <canvas
+            ref={canvasRef}
+            width={800}
+            height={600}
+            className="hidden md:block"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+            }}
+          />
+          {/* Aviso móvil */}
+          <div
+            className="md:hidden absolute inset-0 flex flex-col items-center justify-center"
+            style={{ gap: 16 }}
+          >
+            <div
+              className="pixel"
+              style={{ fontSize: 12, color: 'var(--cyan)' }}
+            >
+              🕹
+            </div>
+            <div
+              className="pixel"
+              style={{
+                fontSize: 9,
+                color: 'var(--ink-dim)',
+                letterSpacing: '0.12em',
+                lineHeight: 2,
+              }}
+            >
+              ESTE JUEGO REQUIERE TECLADO
+              <br />
+              ÁBRELO DESDE UN ESCRITORIO
+            </div>
+          </div>
+          {/* Pausa overlay */}
+          {paused && (
+            <div
+              className="crt-content"
+              style={{ background: 'rgba(0,0,0,0.6)', zIndex: 5 }}
+            >
+              <div>
+                <div className="pixel neon-yellow" style={{ fontSize: 22 }}>
+                  EN PAUSA
+                </div>
+                <div
+                  className="mono"
+                  style={{
+                    fontSize: 11,
+                    color: 'var(--ink-dim)',
+                    marginTop: 10,
+                    letterSpacing: '0.16em',
+                  }}
+                >
+                  PULSA REANUDAR PARA CONTINUAR
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="crt-bottom">
+          <span className="led">SEÑAL OK</span>
+          <span>ASTEROIDES · CRT-S3 · 60 HZ</span>
+          <span>CARGA · 1MB</span>
+        </div>
       </div>
-    </main>
+      {/* ── Modal game over ─────────────────────────────────────────────────── */}
+      {over && (
+        <div className="modal-bd">
+          <div className="modal">
+            <h2>FIN DEL JUEGO</h2>
+            <div className="final-label">PUNTUACIÓN FINAL</div>
+            <div className="final">{finalScore.toLocaleString('es-ES')}</div>
+            {!saved ? (
+              <div className="input-row">
+                <input
+                  defaultValue="INVITADO"
+                  onChange={() => {}}
+                  placeholder="TUS INICIALES"
+                  maxLength={10}
+                  style={{ textTransform: 'uppercase' }}
+                />
+                <button className="btn yellow" onClick={() => setSaved(true)}>
+                  GUARDAR PUNTUACIÓN
+                </button>
+              </div>
+            ) : (
+              <div className="toast-saved">▸ PUNTUACIÓN GUARDADA_</div>
+            )}
+            <div className="actions">
+              <button className="btn" onClick={handleRestart}>
+                JUGAR DE NUEVO
+              </button>
+              <button
+                className="btn magenta"
+                onClick={() => router.push('/biblioteca')}
+              >
+                VOLVER AL VAULT
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 ---
 id: 05-asteroids-game
 title: Juego Asteroides
-state: aprobado
+state: implementado
 date: 2026-06-29
 depends_on: [04-supabase-setup]
 objective: Portar el juego Asteroides (canvas HTML5 vanilla) a una página Next.js standalone en /juegos/asteroides y enlazarlo desde /biblioteca.
