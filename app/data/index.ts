@@ -87,6 +87,18 @@ export const GAMES: Game[] = [
     href: '/juegos/asteroides',
   },
   {
+    id: 'tetris',
+    title: 'TETRIS',
+    short: 'Encaja las piezas, despeja líneas.',
+    long: 'Piezas geométricas descienden desde la oscuridad. Rótalas con wall-kicks, encástralas y limpia líneas para sobrevivir. La velocidad aumenta sin piedad cada 10 líneas.',
+    cat: 'PUZZLE',
+    cover: 'cover-bloques',
+    color: 'cyan',
+    best: 0,
+    plays: '0',
+    href: '/juegos/tetris',
+  },
+  {
     id: 'rocas',
     title: 'ROCAS',
     short: 'Pulveriza asteroides en gravedad cero.',
