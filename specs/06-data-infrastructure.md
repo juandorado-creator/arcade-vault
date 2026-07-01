@@ -1,7 +1,7 @@
 ---
 id: 06-data-infrastructure
 title: Infraestructura de datos de juegos y scores
-state: aprobado
+state: implementado
 date: 2026-06-30
 depends_on: [05-asteroids-game]
 objective: Crear las tablas `games` y `scores` en Supabase, migrar `/biblioteca` a leer juegos desde la base de datos, y añadir el flujo de publicación de score al terminar una partida de Asteroides.
