@@ -13,6 +13,7 @@ export default function AsteroidsPage() {
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
+  const [nickname, setNickname] = useState('');
   const [saved, setSaved] = useState(false);
   const togglePause = useCallback(() => {
     setPaused((p) => {
@@ -29,6 +30,7 @@ export default function AsteroidsPage() {
     setLives(3);
     setLevel(1);
     setOver(false);
+    setNickname('');
     setSaved(false);
     pausedRef.current = false;
     setPaused(false);
@@ -647,18 +649,22 @@ export default function AsteroidsPage() {
             {!saved ? (
               <div className="input-row">
                 <input
-                  defaultValue="INVITADO"
-                  onChange={() => {}}
-                  placeholder="TUS INICIALES"
-                  maxLength={10}
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value.toUpperCase())}
+                  placeholder="TU APODO"
+                  maxLength={20}
                   style={{ textTransform: 'uppercase' }}
                 />
-                <button className="btn yellow" onClick={() => setSaved(true)}>
-                  GUARDAR PUNTUACIÓN
+                <button
+                  className="btn yellow"
+                  disabled={!nickname.trim()}
+                  onClick={() => setSaved(true)}
+                >
+                  PUBLICAR SCORE
                 </button>
               </div>
             ) : (
-              <div className="toast-saved">▸ PUNTUACIÓN GUARDADA_</div>
+              <div className="toast-saved">¡Score publicado!</div>
             )}
             <div className="actions">
               <button className="btn" onClick={handleRestart}>
