@@ -34,7 +34,7 @@ function GameCard({ game }: { game: DbGame }) {
       className="card"
       onMouseMove={onMove}
       onMouseLeave={onLeave}
-      onClick={() => router.push(game.path)}
+      onClick={() => router.push(`/juego/${game.slug}`)}
     >
       <div className="cover">
         <div className={'cover-bg ' + coverClass}></div>
