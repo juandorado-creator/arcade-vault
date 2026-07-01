@@ -271,7 +271,7 @@ export default function TetrisPage() {
       }
     }
     function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, COLS * BLOCK, ROWS * BLOCK);
       drawGrid();
       for (let r = 0; r < ROWS; r++)
         for (let c = 0; c < COLS; c++) drawBlock(ctx, c, r, board[r][c], BLOCK);
@@ -299,7 +299,7 @@ export default function TetrisPage() {
     }
     function drawNext() {
       const NB = 30;
-      nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+      nextCtx.clearRect(0, 0, NB * 4, NB * 4);
       const shape = next.shape;
       const offX = Math.floor((4 - shape[0].length) / 2);
       const offY = Math.floor((4 - shape.length) / 2);
