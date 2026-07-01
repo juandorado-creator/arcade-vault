@@ -1,7 +1,7 @@
 ---
 id: 07-tetris-game
 title: Juego Tetris
-state: aprobado
+state: implementado
 date: 2026-06-30
 depends_on: [06-data-infrastructure]
 objective: Portar el juego Tetris (canvas HTML5 vanilla con HUD DOM y next-piece) a una página Next.js en /juegos/tetris, integrada al leaderboard y a /biblioteca.
@@ -76,21 +76,21 @@ objective: Portar el juego Tetris (canvas HTML5 vanilla con HUD DOM y next-piece
 
 ## Criterios de aceptación
 
-- [ ] `/juegos/tetris` carga sin errores de compilación ni de consola
-- [ ] Ambos canvas (tablero 300×600 y next-piece 120×120) renderizan el juego al entrar a la página
-- [ ] Los controles de teclado responden: `←→` mover, `↑`/`X` rotar (con wall-kicks), `↓` soft drop, `Space` hard drop, `P` pausa
-- [ ] El HUD (`score`, `lines`, `level`) se actualiza correctamente durante la partida
-- [ ] Al limpiar líneas, el score y el nivel se recalculan según `LINE_SCORES` y `dropInterval` se acelera
-- [ ] Al perder (pieza nueva colisiona al spawnear), el overlay de Game Over aparece con el score final correcto
-- [ ] El botón "Publicar score" está deshabilitado si el apodo está vacío
-- [ ] Al publicar un score válido, se inserta una fila en `scores` con `game_id` correspondiente a `tetris` en Supabase
-- [ ] Tras publicar, el overlay muestra confirmación sin cerrarse
-- [ ] "Jugar de nuevo" reinicia la partida sin recargar la página
-- [ ] El cleanup del `useEffect` cancela el RAF y remueve los listeners de teclado de `document`
-- [ ] En pantallas < 768px el canvas se oculta y aparece el aviso de escritorio
-- [ ] `/biblioteca` muestra la card de Tetris con nombre, descripción y cover `cover-bloques` correctos
-- [ ] `/juego/tetris` no da 404 y muestra el detalle con leaderboard leyendo de Supabase
-- [ ] El juego de Asteroides sigue funcionando (sin regresiones)
+- [x] `/juegos/tetris` carga sin errores de compilación ni de consola
+- [x] Ambos canvas (tablero 300×600 y next-piece 120×120) renderizan el juego al entrar a la página
+- [x] Los controles de teclado responden: `←→` mover, `↑`/`X` rotar (con wall-kicks), `↓` soft drop, `Space` hard drop, `P` pausa
+- [x] El HUD (`score`, `lines`, `level`) se actualiza correctamente durante la partida
+- [x] Al limpiar líneas, el score y el nivel se recalculan según `LINE_SCORES` y `dropInterval` se acelera
+- [x] Al perder (pieza nueva colisiona al spawnear), el overlay de Game Over aparece con el score final correcto
+- [x] El botón "Publicar score" está deshabilitado si el apodo está vacío
+- [x] Al publicar un score válido, se inserta una fila en `scores` con `game_id` correspondiente a `tetris` en Supabase
+- [x] Tras publicar, el overlay muestra confirmación sin cerrarse
+- [x] "Jugar de nuevo" reinicia la partida sin recargar la página
+- [x] El cleanup del `useEffect` cancela el RAF y remueve los listeners de teclado de `document`
+- [x] En pantallas < 768px el canvas se oculta y aparece el aviso de escritorio
+- [x] `/biblioteca` muestra la card de Tetris con nombre, descripción y cover `cover-bloques` correctos
+- [x] `/juego/tetris` no da 404 y muestra el detalle con leaderboard leyendo de Supabase
+- [x] El juego de Asteroides sigue funcionando (sin regresiones)
 
 ## Decisiones tomadas y descartadas
 
