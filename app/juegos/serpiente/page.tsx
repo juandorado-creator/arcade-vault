@@ -3,11 +3,47 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Script from 'next/script';
 import { publishScore } from './actions';
+type SkinId = 'clasico' | 'neon' | 'retro';
+type Palette = {
+  bg: string;
+  grid: string;
+  head: string;
+  body: string;
+};
+const SKINS: Record<SkinId, Palette> = {
+  clasico: {
+    bg: '#14161a',
+    grid: 'rgba(255, 255, 255, 0.04)',
+    head: '#8bd450',
+    body: '#4caf50',
+  },
+  neon: {
+    bg: '#05050a',
+    grid: 'rgba(0, 245, 255, 0.08)',
+    head: '#00ff88',
+    body: '#00cc6a',
+  },
+  retro: {
+    bg: '#020a02',
+    grid: 'rgba(77, 255, 122, 0.06)',
+    head: '#4dff7a',
+    body: '#2e8f52',
+  },
+};
+const SKIN_STORAGE_KEY = 'arcade-skin';
 export default function SerpientePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pausedRef = useRef(false);
   const forceEndRef = useRef(false);
   const restartRef = useRef<(() => void) | null>(null);
+  const [skin, setSkin] = useState<SkinId>(() => {
+    if (typeof window === 'undefined') return 'clasico';
+    const stored = window.localStorage.getItem(
+      SKIN_STORAGE_KEY,
+    ) as SkinId | null;
+    return stored && stored in SKINS ? stored : 'clasico';
+  });
+  const skinRef = useRef<Palette>(SKINS[skin]);
   const router = useRouter();
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(1);
@@ -57,6 +93,11 @@ export default function SerpientePage() {
       setPublishing(false);
     }
   }, [nickname, finalScore]);
+  const handleSkinChange = useCallback((next: SkinId) => {
+    setSkin(next);
+    skinRef.current = SKINS[next];
+    window.localStorage.setItem(SKIN_STORAGE_KEY, next);
+  }, []);
   useEffect(() => {
     if (!spritesReady) return;
     const canvas = canvasRef.current;
@@ -194,9 +235,10 @@ export default function SerpientePage() {
       setOver(true);
     }
     function draw() {
-      ctx.fillStyle = '#14161a';
+      const palette = skinRef.current;
+      ctx.fillStyle = palette.bg;
       ctx.fillRect(0, 0, W, H);
-      ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+      ctx.strokeStyle = palette.grid;
       for (let x = 0; x <= COLS; x++) {
         ctx.beginPath();
         ctx.moveTo(x * CELL, 0);
@@ -211,7 +253,7 @@ export default function SerpientePage() {
       }
       w.drawFruit(ctx, foodType, food.x * CELL, food.y * CELL, CELL, CELL);
       snake.forEach((seg, i) => {
-        ctx.fillStyle = i === 0 ? '#8bd450' : '#4caf50';
+        ctx.fillStyle = i === 0 ? palette.head : palette.body;
         ctx.fillRect(seg.x * CELL + 1, seg.y * CELL + 1, CELL - 2, CELL - 2);
       });
     }
@@ -313,7 +355,33 @@ export default function SerpientePage() {
               <div className="v">{String(level).padStart(2, '0')}</div>
             </div>
           </div>
-          <div className="hud-actions">
+          <div className="hud-actions" style={{ alignItems: 'center' }}>
+            <select
+              className="btn ghost"
+              aria-label="Selector de skin"
+              value={skin}
+              onChange={(e) => {
+                handleSkinChange(e.target.value as SkinId);
+                e.target.blur();
+              }}
+              style={{
+                padding: '8px 10px',
+                fontSize: 8,
+                cursor: 'pointer',
+                color: 'var(--cyan)',
+                borderColor: 'var(--cyan)',
+              }}
+            >
+              {(['neon', 'retro', 'clasico'] as SkinId[]).map((id) => (
+                <option
+                  key={id}
+                  value={id}
+                  style={{ background: 'var(--bg)', color: 'var(--ink)' }}
+                >
+                  {id.toUpperCase()}
+                </option>
+              ))}
+            </select>
             <button className="btn yellow" onClick={togglePause}>
               {paused ? 'REANUDAR' : 'PAUSA'}
             </button>
