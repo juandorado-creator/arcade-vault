@@ -1,7 +1,7 @@
 ---
 id: 09-serpiente-game
 title: Juego Serpiente
-state: aprobado
+state: implementado
 date: 2026-07-01
 depends_on: [06-data-infrastructure]
 objective: Portar el juego Serpiente (canvas HTML5 vanilla con HUD DOM y spritesheet de frutas) a una página Next.js en /juegos/serpiente, integrada al leaderboard y a /biblioteca.
@@ -78,34 +78,35 @@ objective: Portar el juego Serpiente (canvas HTML5 vanilla con HUD DOM y sprites
 
 ## Criterios de aceptación
 
-- [ ] `/juegos/serpiente` carga sin errores de compilación ni de consola
-- [ ] El canvas 600×600 renderiza el juego (grid, serpiente, fruta) al entrar a la página
-- [ ] Los controles de teclado responden: flechas/WASD mueven, `P`/`Escape` pausa
-- [ ] La serpiente crece al comer fruta y el score aumenta según `SCORE_PER_FRUIT * level`
-- [ ] Cada 5 frutas comidas sube de nivel y el `moveInterval` se acelera (hasta el mínimo definido)
-- [ ] Las frutas se dibujan con el spritesheet (`drawFruit`) sin errores de carga de imagen
-- [ ] Al chocar contra el borde o contra sí misma, el modal de Game Over aparece con el score final correcto
-- [ ] El botón "Publicar score" está deshabilitado si el apodo está vacío
-- [ ] Al publicar un score válido, se inserta una fila en `scores` con `game_id` correspondiente a `serpiente` en Supabase
-- [ ] Tras publicar, el modal muestra confirmación sin cerrarse
-- [ ] "Jugar de nuevo" reinicia la partida sin recargar la página
-- [ ] El cleanup del `useEffect` cancela el RAF y remueve el listener de teclado de `window`
-- [ ] En pantallas < 768px el canvas se oculta y aparece el aviso de escritorio
-- [ ] `/biblioteca` muestra la card de Serpiente con nombre, descripción y cover `cover-fruta` correctos
-- [ ] `/juego/serpiente` no da 404 y muestra el detalle con leaderboard leyendo de Supabase
-- [ ] Los juegos de Asteroides, Tetris y Arkanoid siguen funcionando (sin regresiones)
+- [x] `/juegos/serpiente` carga sin errores de compilación ni de consola
+- [x] El canvas 600×600 renderiza el juego (grid, serpiente, fruta) al entrar a la página
+- [x] Los controles de teclado responden: flechas/WASD mueven, `P`/`Escape` pausa
+- [x] La serpiente crece al comer fruta y el score aumenta según `SCORE_PER_FRUIT * level`
+- [x] Cada 5 frutas comidas sube de nivel y el `moveInterval` se acelera (hasta el mínimo definido)
+- [x] Las frutas se dibujan con el spritesheet (`drawFruit`) sin errores de carga de imagen
+- [x] Al chocar contra el borde o contra sí misma, el modal de Game Over aparece con el score final correcto
+- [x] El botón "Publicar score" está deshabilitado si el apodo está vacío
+- [x] Al publicar un score válido, se inserta una fila en `scores` con `game_id` correspondiente a `serpiente` en Supabase
+- [x] Tras publicar, el modal muestra confirmación sin cerrarse
+- [x] "Jugar de nuevo" reinicia la partida sin recargar la página
+- [x] El cleanup del `useEffect` cancela el RAF y remueve el listener de teclado de `window`
+- [x] En pantallas < 768px el canvas se oculta y aparece el aviso de escritorio
+- [x] `/biblioteca` muestra la card de Serpiente con nombre, descripción y cover `cover-fruta` correctos
+- [x] `/juego/serpiente` no da 404 y muestra el detalle con leaderboard leyendo de Supabase
+- [x] Los juegos de Asteroides, Tetris y Arkanoid siguen funcionando (sin regresiones)
 
 ## Decisiones tomadas y descartadas
 
-| Decisión             | Elegida                                                                                                                      | Descartada                                                                     | Motivo                                                                                             |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| Slug                 | `serpiente`                                                                                                                  | `snake`                                                                        | Coherencia con nombres en español del resto del sitio (decisión explícita del usuario)             |
-| Estrategia de port   | `useEffect` con lógica vanilla dentro, siguiendo las 7 reglas                                                                | Reescritura en TypeScript/clases React                                         | Mismo patrón probado en Asteroides/Tetris; minimiza fricción y riesgo                              |
-| HUD                  | Campos propios `score`, `level` en JSX (sin `lives`)                                                                         | Mantener overlay/divs HTML del original                                        | Serpiente no tiene vidas; el molde `.player-hud` del shell arcade ya soporta HUD variable          |
-| Assets de sprites    | `public/serpiente/` + `sprites.js` cargado como `<script>` propio, usando `window.SPRITE_ATLAS`/`loadFruitSheet`/`drawFruit` | Portar el contenido de `sprites.js` a funciones locales dentro del `useEffect` | `sprites.js` ya usa globals en `window`; mínima fricción, coherente con cómo el original lo diseñó |
-| Overlay de Game Over | Modal estándar del shell arcade (igual que Asteroides/Tetris)                                                                | Mantener el overlay HTML/CSS original                                          | Consistencia visual entre juegos de la plataforma                                                  |
-| Reinicio             | `reset()` expuesto vía `restartRef.current`                                                                                  | Botón HTML original con `addEventListener` directo                             | Patrón estándar ya usado en Asteroides y Tetris                                                    |
-| Entrada en `GAMES[]` | Paso obligatorio del plan                                                                                                    | Paso opcional (como sugiere el skill por defecto)                              | Aprendido de spec 07: sin esta entrada, `/juego/serpiente` responde `notFound()`                   |
-| Cover art            | Clase nueva `cover-fruta`                                                                                                    | `cover-jardin`                                                                 | Ligada visualmente a las frutas del spritesheet del propio juego                                   |
-| Listener de teclado  | En `window`, como el original                                                                                                | Forzar `document` como Tetris                                                  | El juego original ya funciona así; no hay razón funcional para cambiarlo                           |
-| RLS en tablas        | Fuera de alcance                                                                                                             | Configurar políticas ahora                                                     | Heredado de spec 06; se define cuando exista auth real                                             |
+| Decisión             | Elegida                                                                                                                      | Descartada                                                                     | Motivo                                                                                                                                                               |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Slug                 | `serpiente`                                                                                                                  | `snake`                                                                        | Coherencia con nombres en español del resto del sitio (decisión explícita del usuario)                                                                               |
+| Estrategia de port   | `useEffect` con lógica vanilla dentro, siguiendo las 7 reglas                                                                | Reescritura en TypeScript/clases React                                         | Mismo patrón probado en Asteroides/Tetris; minimiza fricción y riesgo                                                                                                |
+| HUD                  | Campos propios `score`, `level` en JSX (sin `lives`)                                                                         | Mantener overlay/divs HTML del original                                        | Serpiente no tiene vidas; el molde `.player-hud` del shell arcade ya soporta HUD variable                                                                            |
+| Assets de sprites    | `public/serpiente/` + `sprites.js` cargado como `<script>` propio, usando `window.SPRITE_ATLAS`/`loadFruitSheet`/`drawFruit` | Portar el contenido de `sprites.js` a funciones locales dentro del `useEffect` | `sprites.js` ya usa globals en `window`; mínima fricción, coherente con cómo el original lo diseñó                                                                   |
+| Overlay de Game Over | Modal estándar del shell arcade (igual que Asteroides/Tetris)                                                                | Mantener el overlay HTML/CSS original                                          | Consistencia visual entre juegos de la plataforma                                                                                                                    |
+| Reinicio             | `reset()` expuesto vía `restartRef.current`                                                                                  | Botón HTML original con `addEventListener` directo                             | Patrón estándar ya usado en Asteroides y Tetris                                                                                                                      |
+| Entrada en `GAMES[]` | Paso obligatorio del plan                                                                                                    | Paso opcional (como sugiere el skill por defecto)                              | Aprendido de spec 07: sin esta entrada, `/juego/serpiente` responde `notFound()`                                                                                     |
+| Cover art            | Clase nueva `cover-fruta`                                                                                                    | `cover-jardin`                                                                 | Ligada visualmente a las frutas del spritesheet del propio juego                                                                                                     |
+| Listener de teclado  | En `window`, como el original                                                                                                | Forzar `document` como Tetris                                                  | El juego original ya funciona así; no hay razón funcional para cambiarlo                                                                                             |
+| RLS en tablas        | Fuera de alcance                                                                                                             | Configurar políticas ahora                                                     | Heredado de spec 06; se define cuando exista auth real                                                                                                               |
+| Foco del input apodo | `onKeyDown` ignora eventos cuyo `target` es `INPUT`/`TEXTAREA`                                                               | Dejar el listener global sin guardas                                           | Detectado post-implementación: WASD/P se interceptaban con `preventDefault()` incluso con el modal de Game Over abierto, bloqueando esas letras en el campo de apodo |
