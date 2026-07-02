@@ -11,6 +11,7 @@ export interface DbGame {
 const COVER_MAP: Record<string, string> = {
   asteroides: 'cover-rocas',
   tetris: 'cover-bloques',
+  arkanoid: 'cover-ladrillos',
 };
 function GameCard({ game }: { game: DbGame }) {
   const router = useRouter();

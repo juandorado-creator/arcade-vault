@@ -99,6 +99,18 @@ export const GAMES: Game[] = [
     href: '/juegos/tetris',
   },
   {
+    id: 'arkanoid',
+    title: 'ARKANOID',
+    short: 'Rompe bloques, sobrevive 5 niveles.',
+    long: 'Pilota una paleta y rebota la pelota para pulverizar 5 niveles de bloques cromáticos, cada uno más veloz que el anterior. Un solo descuido y pierdes una vida.',
+    cat: 'ARCADE',
+    cover: 'cover-ladrillos',
+    color: 'magenta',
+    best: 0,
+    plays: '0',
+    href: '/juegos/arkanoid',
+  },
+  {
     id: 'rocas',
     title: 'ROCAS',
     short: 'Pulveriza asteroides en gravedad cero.',
