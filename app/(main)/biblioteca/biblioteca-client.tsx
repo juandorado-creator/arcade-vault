@@ -12,6 +12,7 @@ const COVER_MAP: Record<string, string> = {
   asteroides: 'cover-rocas',
   tetris: 'cover-bloques',
   arkanoid: 'cover-ladrillos',
+  serpiente: 'cover-fruta',
 };
 function GameCard({ game }: { game: DbGame }) {
   const router = useRouter();
