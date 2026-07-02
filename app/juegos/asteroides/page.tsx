@@ -2,11 +2,53 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { publishScore } from './actions';
+type SkinId = 'clasico' | 'neon' | 'retro';
+type Palette = {
+  bg: string;
+  ship: string;
+  asteroid: string;
+  bullet: string;
+  particle: string;
+  powerUp: string;
+  thrust: string;
+};
+const SKINS: Record<SkinId, Palette> = {
+  clasico: {
+    bg: '#000000',
+    ship: '#ffffff',
+    asteroid: '#ffffff',
+    bullet: '#ffffff',
+    particle: '255,255,255',
+    powerUp: '#00ffff',
+    thrust: 'rgba(255, 130, 0, 0.85)',
+  },
+  neon: {
+    bg: '#05050a',
+    ship: '#00f5ff',
+    asteroid: '#ff006e',
+    bullet: '#f5ff00',
+    particle: '0,245,255',
+    powerUp: '#00ff88',
+    thrust: 'rgba(255, 0, 110, 0.9)',
+  },
+  retro: {
+    bg: '#020a02',
+    ship: '#4dff7a',
+    asteroid: '#2e8f52',
+    bullet: '#9dffb0',
+    particle: '77,255,122',
+    powerUp: '#ffb347',
+    thrust: 'rgba(255, 179, 71, 0.8)',
+  },
+};
+const SKIN_STORAGE_KEY = 'arcade-skin';
 export default function AsteroidsPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pausedRef = useRef(false);
   const forceEndRef = useRef(false);
   const restartRef = useRef<(() => void) | null>(null);
+  const skinRef = useRef<Palette>(SKINS.clasico);
+  const [skin, setSkin] = useState<SkinId>('clasico');
   const router = useRouter();
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
@@ -18,6 +60,20 @@ export default function AsteroidsPage() {
   const [saved, setSaved] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState('');
+  useEffect(() => {
+    const stored = window.localStorage.getItem(
+      SKIN_STORAGE_KEY,
+    ) as SkinId | null;
+    if (stored && stored in SKINS) {
+      setSkin(stored);
+      skinRef.current = SKINS[stored];
+    }
+  }, []);
+  const handleSkinChange = useCallback((next: SkinId) => {
+    setSkin(next);
+    skinRef.current = SKINS[next];
+    window.localStorage.setItem(SKIN_STORAGE_KEY, next);
+  }, []);
   const togglePause = useCallback(() => {
     setPaused((p) => {
       pausedRef.current = !p;
@@ -119,7 +175,7 @@ export default function AsteroidsPage() {
         if (this.ttl <= 0) this.dead = true;
       }
       draw() {
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = skinRef.current.bullet;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
@@ -176,7 +232,7 @@ export default function AsteroidsPage() {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rot);
-        ctx.strokeStyle = '#fff';
+        ctx.strokeStyle = skinRef.current.asteroid;
         ctx.lineWidth = 1.5;
         ctx.lineJoin = 'round';
         ctx.beginPath();
@@ -220,12 +276,12 @@ export default function AsteroidsPage() {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(Math.PI / 4);
-        ctx.strokeStyle = '#0ff';
+        ctx.strokeStyle = skinRef.current.powerUp;
         ctx.lineWidth = 2;
         const r = this.radius * pulse;
         ctx.strokeRect(-r, -r, r * 2, r * 2);
         ctx.restore();
-        ctx.fillStyle = '#0ff';
+        ctx.fillStyle = skinRef.current.powerUp;
         ctx.font = 'bold 12px monospace';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -312,7 +368,7 @@ export default function AsteroidsPage() {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
-        ctx.strokeStyle = '#fff';
+        ctx.strokeStyle = skinRef.current.ship;
         ctx.lineWidth = 1.5;
         ctx.lineJoin = 'round';
         ctx.beginPath();
@@ -327,7 +383,7 @@ export default function AsteroidsPage() {
           ctx.moveTo(-8, -4);
           ctx.lineTo(-8 - rand(6, 14), 0);
           ctx.lineTo(-8, 4);
-          ctx.strokeStyle = 'rgba(255, 130, 0, 0.85)';
+          ctx.strokeStyle = skinRef.current.thrust;
           ctx.stroke();
         }
         ctx.restore();
@@ -361,7 +417,7 @@ export default function AsteroidsPage() {
       }
       draw() {
         const alpha = this.ttl / this.life;
-        ctx.strokeStyle = `rgba(255,255,255,${alpha.toFixed(2)})`;
+        ctx.strokeStyle = `rgba(${skinRef.current.particle},${alpha.toFixed(2)})`;
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(this.x, this.y);
@@ -497,7 +553,7 @@ export default function AsteroidsPage() {
     }
     // ── Draw ─────────────────────────────────────────────────────────────────
     function draw() {
-      ctx.fillStyle = '#000';
+      ctx.fillStyle = skinRef.current.bg;
       ctx.fillRect(0, 0, W, H);
       particles.forEach((p) => p.draw());
       asteroids.forEach((a) => a.draw());
@@ -573,7 +629,33 @@ export default function AsteroidsPage() {
             <div className="v">{String(level).padStart(2, '0')}</div>
           </div>
         </div>
-        <div className="hud-actions">
+        <div className="hud-actions" style={{ alignItems: 'center' }}>
+          <select
+            className="btn ghost"
+            aria-label="Selector de skin"
+            value={skin}
+            onChange={(e) => {
+              handleSkinChange(e.target.value as SkinId);
+              e.target.blur();
+            }}
+            style={{
+              padding: '8px 10px',
+              fontSize: 8,
+              cursor: 'pointer',
+              color: 'var(--cyan)',
+              borderColor: 'var(--cyan)',
+            }}
+          >
+            {(['neon', 'retro', 'clasico'] as SkinId[]).map((id) => (
+              <option
+                key={id}
+                value={id}
+                style={{ background: 'var(--bg)', color: 'var(--ink)' }}
+              >
+                {id.toUpperCase()}
+              </option>
+            ))}
+          </select>
           <button className="btn yellow" onClick={togglePause}>
             {paused ? 'REANUDAR' : 'PAUSA'}
           </button>
