@@ -808,6 +808,39 @@ a {
   opacity: 0.85;
   filter: drop-shadow(0 0 6px rgba(0, 245, 255, 0.4));
 }
+.cover-ladrillos {
+  background: linear-gradient(180deg, #1a0a10, #000);
+}
+.cover-ladrillos::after {
+  content: '';
+  position: absolute;
+  inset: 14% 10% 0 10%;
+  height: 46%;
+  background:
+    repeating-linear-gradient(
+        90deg,
+        #ff003c 0 26px,
+        #f5ff00 26px 52px,
+        #00f5ff 52px 78px,
+        #ff00c8 78px 104px,
+        #ff7700 104px 130px,
+        #00ff88 130px 156px
+      )
+      0 0/100% 15px repeat,
+    #000;
+  filter: drop-shadow(0 0 6px rgba(255, 0, 60, 0.35));
+}
+.cover-ladrillos::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 16%;
+  width: 34px;
+  height: 6px;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+  transform: translateX(-50%);
+}
 .cover-rana {
   background: linear-gradient(180deg, #001f2a, #0a0a18);
 }
