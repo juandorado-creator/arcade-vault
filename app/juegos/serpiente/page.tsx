@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Script from 'next/script';
+import { publishScore } from './actions';
 export default function SerpientePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pausedRef = useRef(false);
@@ -41,8 +42,21 @@ export default function SerpientePage() {
     restartRef.current?.();
   }, []);
   const handlePublish = useCallback(async () => {
-    // Se conecta a app/juegos/serpiente/actions.ts en el paso 5
-  }, []);
+    setPublishing(true);
+    setPublishError('');
+    const result = await publishScore({
+      nickname,
+      score: finalScore,
+      gameSlug: 'serpiente',
+    });
+    if (result.error) {
+      setPublishError(result.error);
+      setPublishing(false);
+    } else {
+      setSaved(true);
+      setPublishing(false);
+    }
+  }, [nickname, finalScore]);
   useEffect(() => {
     if (!spritesReady) return;
     const canvas = canvasRef.current;
