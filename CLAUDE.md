@@ -15,6 +15,10 @@ No test runner is configured yet.
 - Usa siempre **/frontend-design** para diseñar la interfaz de usuario.
 - **/spec** genera la especificación de una feature en `specs/`; **/spec-impl** la implementa. Ambas están fijadas en `skills-lock.json`.
 
+## Agentes
+
+- **`game-planner`** (`.claude/agents/game-planner.md`) — decide qué juego nuevo encaja en la plataforma (huecos de categoría, clásicos retro, viabilidad técnica, variedad de mecánica) y registra la sugerencia en `references/game-suggestions-todo.md`, su memoria persistente para no repetir ideas. No genera specs ni código; el siguiente paso manual es `/spec`.
+
 ## Stack
 
 - **Next.js 16.2.9** with App Router — **this version has breaking changes vs training data**. Before writing any Next.js code, read the relevant guide in `node_modules/next/dist/docs/`. For quick navigation, there is `index.md` + subdirs `01-app/`, `02-pages/`, `03-architecture/`.
