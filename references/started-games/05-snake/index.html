@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Snake</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #2d2d2d;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: sans-serif;
+      color: #fff;
+    }
+    .hud {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 12px;
+      font-size: 18px;
+    }
+    .hud span { font-weight: bold; }
+    .wrap { position: relative; }
+    canvas { display: block; }
+    .overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    .overlay button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      background: #4caf50;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="hud">
+    <div>Score: <span id="score">0</span></div>
+    <div>Nivel: <span id="level">1</span></div>
+  </div>
+  <div class="wrap">
+    <canvas id="board" width="600" height="600"></canvas>
+    <div id="overlay" class="overlay">
+      <h2 id="overlay-title">Game Over</h2>
+      <p id="overlay-score">Puntuación: 0</p>
+      <button id="restart-btn">Jugar de nuevo</button>
+    </div>
+  </div>
+  <script src="assets/sprites.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
