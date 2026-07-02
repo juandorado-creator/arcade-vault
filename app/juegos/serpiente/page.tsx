@@ -48,10 +48,224 @@ export default function SerpientePage() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d')!;
-    // La lógica del juego se porta desde game.js en el paso 4
-    ctx.fillStyle = '#14161a';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    return () => {};
+    const W = canvas.width;
+    const H = canvas.height;
+    type SnakeWindow = Window & {
+      FRUIT_NAMES: string[];
+      loadFruitSheet: (cb: () => void) => void;
+      drawFruit: (
+        ctx: CanvasRenderingContext2D,
+        name: string,
+        x: number,
+        y: number,
+        w: number,
+        h: number,
+      ) => void;
+    };
+    const w = window as unknown as SnakeWindow;
+    // ── Constants ────────────────────────────────────────────────────────────
+    const COLS = 30;
+    const ROWS = 30;
+    const CELL = 20;
+    const START_LENGTH = 3;
+    const BASE_MOVE_INTERVAL = 150; // ms entre movimientos en nivel 1
+    const MIN_MOVE_INTERVAL = 60;
+    const MOVE_INTERVAL_STEP = 10; // ms que se reduce por nivel
+    const FRUITS_PER_LEVEL = 5;
+    const SCORE_PER_FRUIT = 10;
+    type Dir = 'up' | 'down' | 'left' | 'right';
+    const DIRS: Record<Dir, { x: number; y: number }> = {
+      up: { x: 0, y: -1 },
+      down: { x: 0, y: 1 },
+      left: { x: -1, y: 0 },
+      right: { x: 1, y: 0 },
+    };
+    const KEY_TO_DIR: Record<string, Dir> = {
+      ArrowUp: 'up',
+      KeyW: 'up',
+      ArrowDown: 'down',
+      KeyS: 'down',
+      ArrowLeft: 'left',
+      KeyA: 'left',
+      ArrowRight: 'right',
+      KeyD: 'right',
+    };
+    // ── Estado del juego ─────────────────────────────────────────────────────
+    type Cell = { x: number; y: number };
+    let snake: Cell[];
+    let direction: Dir;
+    let nextDirection: Dir;
+    let food: Cell;
+    let foodType: string;
+    let score = 0;
+    let level = 1;
+    let fruitsEaten = 0;
+    let paused = false;
+    let gameOver = false;
+    let moveInterval = BASE_MOVE_INTERVAL;
+    let moveAccum = 0;
+    let animId = 0;
+    let lastTime: number | null = null;
+    function randomEmptyCell(): Cell {
+      let cell: Cell;
+      do {
+        cell = {
+          x: Math.floor(Math.random() * COLS),
+          y: Math.floor(Math.random() * ROWS),
+        };
+      } while (snake.some((s) => s.x === cell.x && s.y === cell.y));
+      return cell;
+    }
+    function spawnFood() {
+      food = randomEmptyCell();
+      foodType =
+        w.FRUIT_NAMES[Math.floor(Math.random() * w.FRUIT_NAMES.length)];
+    }
+    function reset() {
+      const cy = Math.floor(ROWS / 2);
+      snake = [];
+      for (let i = START_LENGTH - 1; i >= 0; i--) {
+        snake.push({ x: i, y: cy });
+      }
+      direction = 'right';
+      nextDirection = 'right';
+      score = 0;
+      level = 1;
+      fruitsEaten = 0;
+      paused = false;
+      gameOver = false;
+      moveAccum = 0;
+      moveInterval = BASE_MOVE_INTERVAL;
+      spawnFood();
+    }
+    function changeDirection(dir: Dir) {
+      const opposite: Record<Dir, Dir> = {
+        up: 'down',
+        down: 'up',
+        left: 'right',
+        right: 'left',
+      };
+      if (dir === opposite[direction]) return; // no se puede invertir sobre sí misma
+      nextDirection = dir;
+    }
+    function step() {
+      direction = nextDirection;
+      const d = DIRS[direction];
+      const head = { x: snake[0].x + d.x, y: snake[0].y + d.y };
+      if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS) {
+        return endGame();
+      }
+      if (snake.some((s) => s.x === head.x && s.y === head.y)) {
+        return endGame();
+      }
+      snake.unshift(head);
+      if (head.x === food.x && head.y === food.y) {
+        score += SCORE_PER_FRUIT * level;
+        fruitsEaten += 1;
+        if (fruitsEaten % FRUITS_PER_LEVEL === 0) {
+          level += 1;
+          moveInterval = Math.max(
+            MIN_MOVE_INTERVAL,
+            BASE_MOVE_INTERVAL - (level - 1) * MOVE_INTERVAL_STEP,
+          );
+        }
+        spawnFood();
+      } else {
+        snake.pop();
+      }
+    }
+    function endGame() {
+      gameOver = true;
+      setFinalScore(score);
+      setOver(true);
+    }
+    function draw() {
+      ctx.fillStyle = '#14161a';
+      ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+      for (let x = 0; x <= COLS; x++) {
+        ctx.beginPath();
+        ctx.moveTo(x * CELL, 0);
+        ctx.lineTo(x * CELL, ROWS * CELL);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= ROWS; y++) {
+        ctx.beginPath();
+        ctx.moveTo(0, y * CELL);
+        ctx.lineTo(COLS * CELL, y * CELL);
+        ctx.stroke();
+      }
+      w.drawFruit(ctx, foodType, food.x * CELL, food.y * CELL, CELL, CELL);
+      snake.forEach((seg, i) => {
+        ctx.fillStyle = i === 0 ? '#8bd450' : '#4caf50';
+        ctx.fillRect(seg.x * CELL + 1, seg.y * CELL + 1, CELL - 2, CELL - 2);
+      });
+    }
+    // ── Input ────────────────────────────────────────────────────────────────
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.code === 'KeyP' || e.code === 'Escape') {
+        if (!gameOver) {
+          pausedRef.current = !pausedRef.current;
+          setPaused(pausedRef.current);
+        }
+        return;
+      }
+      const dir = KEY_TO_DIR[e.code];
+      if (dir) {
+        e.preventDefault();
+        changeDirection(dir);
+      }
+    }
+    window.addEventListener('keydown', onKeyDown);
+    // ── Loop principal ───────────────────────────────────────────────────────
+    let lastScore = 0;
+    let lastLevel = 1;
+    function loop(ts: number) {
+      if (lastTime === null) lastTime = ts;
+      const delta = ts - lastTime;
+      lastTime = ts;
+      paused = pausedRef.current;
+      if (forceEndRef.current && !gameOver) {
+        endGame();
+      }
+      if (!paused && !gameOver) {
+        moveAccum += delta;
+        while (moveAccum >= moveInterval) {
+          moveAccum -= moveInterval;
+          step();
+          if (gameOver) break;
+        }
+      }
+      draw();
+      // Sync to React — setState is a no-op when value is unchanged (React.is)
+      if (score !== lastScore) {
+        setScore(score);
+        lastScore = score;
+      }
+      if (level !== lastLevel) {
+        setLevel(level);
+        lastLevel = level;
+      }
+      if (!gameOver) {
+        animId = requestAnimationFrame(loop);
+      }
+    }
+    function init() {
+      reset();
+      lastTime = null;
+      lastScore = 0;
+      lastLevel = 1;
+      cancelAnimationFrame(animId);
+      animId = requestAnimationFrame(loop);
+    }
+    restartRef.current = init;
+    w.loadFruitSheet(() => {
+      init();
+    });
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('keydown', onKeyDown);
+    };
   }, [spritesReady]);
   return (
     <>
