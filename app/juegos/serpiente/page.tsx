@@ -217,6 +217,12 @@ export default function SerpientePage() {
     }
     // ── Input ────────────────────────────────────────────────────────────────
     function onKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')
+      )
+        return;
       if (e.code === 'KeyP' || e.code === 'Escape') {
         if (!gameOver) {
           pausedRef.current = !pausedRef.current;

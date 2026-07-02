@@ -111,6 +111,18 @@ export const GAMES: Game[] = [
     href: '/juegos/arkanoid',
   },
   {
+    id: 'serpiente',
+    title: 'SERPIENTE',
+    short: 'Come frutas, crece y evita chocar contigo mismo.',
+    long: 'Guía una serpiente de neón por una grilla de 30x30. Come frutas para crecer y sumar puntos, sube de nivel cada 5 frutas y esquiva los bordes y tu propia cola.',
+    cat: 'ARCADE',
+    cover: 'cover-fruta',
+    color: 'green',
+    best: 0,
+    plays: '0',
+    href: '/juegos/serpiente',
+  },
+  {
     id: 'rocas',
     title: 'ROCAS',
     short: 'Pulveriza asteroides en gravedad cero.',
