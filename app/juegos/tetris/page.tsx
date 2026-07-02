@@ -2,12 +2,71 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { publishScore } from './actions';
+type SkinId = 'clasico' | 'neon' | 'retro';
+type Palette = {
+  // colores de las piezas, en orden I · O · T · S · Z · J · L · N (tuerca)
+  pieces: string[];
+  highlight: string;
+  grid: string;
+};
+const SKINS: Record<SkinId, Palette> = {
+  clasico: {
+    pieces: [
+      '#4dd0e1',
+      '#ffd54f',
+      '#ba68c8',
+      '#81c784',
+      '#e57373',
+      '#90caf9',
+      '#ffb74d',
+      '#9e9e9e',
+    ],
+    highlight: 'rgba(255,255,255,0.12)',
+    grid: 'rgba(255,255,255,0.06)',
+  },
+  neon: {
+    pieces: [
+      '#00f5ff',
+      '#f5ff00',
+      '#ff006e',
+      '#00ff88',
+      '#ff3b3b',
+      '#3b82ff',
+      '#ff8c00',
+      '#c0c0d0',
+    ],
+    highlight: 'rgba(0,245,255,0.18)',
+    grid: 'rgba(0,245,255,0.08)',
+  },
+  retro: {
+    pieces: [
+      '#4dff7a',
+      '#ffb347',
+      '#6fcf97',
+      '#2e8f52',
+      '#d98c3d',
+      '#9dffb0',
+      '#c97a2b',
+      '#7a9c7a',
+    ],
+    highlight: 'rgba(77,255,122,0.15)',
+    grid: 'rgba(77,255,122,0.07)',
+  },
+};
+const SKIN_STORAGE_KEY = 'arcade-skin';
+function getInitialSkin(): SkinId {
+  if (typeof window === 'undefined') return 'clasico';
+  const stored = window.localStorage.getItem(SKIN_STORAGE_KEY) as SkinId | null;
+  return stored && stored in SKINS ? stored : 'clasico';
+}
 export default function TetrisPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const nextCanvasRef = useRef<HTMLCanvasElement>(null);
   const pausedRef = useRef(false);
   const forceEndRef = useRef(false);
   const restartRef = useRef<(() => void) | null>(null);
+  const [skin, setSkin] = useState<SkinId>(getInitialSkin);
+  const skinRef = useRef<Palette>(SKINS[getInitialSkin()]);
   const router = useRouter();
   const [score, setScore] = useState(0);
   const [lines, setLines] = useState(0);
@@ -59,6 +118,14 @@ export default function TetrisPage() {
     }
   }, [nickname, finalScore]);
   useEffect(() => {
+    skinRef.current = SKINS[skin];
+  }, [skin]);
+  const handleSkinChange = useCallback((next: SkinId) => {
+    setSkin(next);
+    skinRef.current = SKINS[next];
+    window.localStorage.setItem(SKIN_STORAGE_KEY, next);
+  }, []);
+  useEffect(() => {
     const canvas = canvasRef.current;
     const nextCanvas = nextCanvasRef.current;
     if (!canvas || !nextCanvas) return;
@@ -68,17 +135,6 @@ export default function TetrisPage() {
     const COLS = 10;
     const ROWS = 20;
     const BLOCK = 30;
-    const COLORS: (string | null)[] = [
-      null,
-      '#4dd0e1', // I - cyan
-      '#ffd54f', // O - yellow
-      '#ba68c8', // T - purple
-      '#81c784', // S - green
-      '#e57373', // Z - red
-      '#90caf9', // J - pale blue
-      '#ffb74d', // L - orange
-      '#9e9e9e', // N - tuerca (gris metálico)
-    ];
     const PIECES: number[][][] = [
       [],
       [
@@ -246,16 +302,16 @@ export default function TetrisPage() {
       alpha?: number,
     ) {
       if (!colorIndex) return;
-      const color = COLORS[colorIndex]!;
+      const color = skinRef.current.pieces[colorIndex - 1];
       context.globalAlpha = alpha ?? 1;
       context.fillStyle = color;
       context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-      context.fillStyle = 'rgba(255,255,255,0.12)';
+      context.fillStyle = skinRef.current.highlight;
       context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
       context.globalAlpha = 1;
     }
     function drawGrid() {
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.strokeStyle = skinRef.current.grid;
       ctx.lineWidth = 0.5;
       for (let c = 1; c < COLS; c++) {
         ctx.beginPath();
@@ -434,7 +490,33 @@ export default function TetrisPage() {
           height={120}
           className="hidden md:block"
         />
-        <div className="hud-actions">
+        <div className="hud-actions" style={{ alignItems: 'center' }}>
+          <select
+            className="btn ghost"
+            aria-label="Selector de skin"
+            value={skin}
+            onChange={(e) => {
+              handleSkinChange(e.target.value as SkinId);
+              e.target.blur();
+            }}
+            style={{
+              padding: '8px 10px',
+              fontSize: 8,
+              cursor: 'pointer',
+              color: 'var(--cyan)',
+              borderColor: 'var(--cyan)',
+            }}
+          >
+            {(['neon', 'retro', 'clasico'] as SkinId[]).map((id) => (
+              <option
+                key={id}
+                value={id}
+                style={{ background: 'var(--bg)', color: 'var(--ink)' }}
+              >
+                {id.toUpperCase()}
+              </option>
+            ))}
+          </select>
           <button className="btn yellow" onClick={togglePause}>
             {paused ? 'REANUDAR' : 'PAUSA'}
           </button>

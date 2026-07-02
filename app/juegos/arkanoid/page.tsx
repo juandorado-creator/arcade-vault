@@ -2,11 +2,47 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { publishScore } from './actions';
+type SkinId = 'clasico' | 'neon' | 'retro';
+type Palette = {
+  bg: string;
+  hudText: string;
+  overlayBg: string;
+  overlayText: string;
+};
+const SKINS: Record<SkinId, Palette> = {
+  clasico: {
+    bg: '#000000',
+    hudText: '#ffffff',
+    overlayBg: 'rgba(0, 0, 0, 0.6)',
+    overlayText: '#ffffff',
+  },
+  neon: {
+    bg: '#05050a',
+    hudText: '#00f5ff',
+    overlayBg: 'rgba(255, 0, 110, 0.35)',
+    overlayText: '#ff006e',
+  },
+  retro: {
+    bg: '#0a0500',
+    hudText: '#d9a441',
+    overlayBg: 'rgba(20, 10, 0, 0.65)',
+    overlayText: '#f0c060',
+  },
+};
+const SKIN_STORAGE_KEY = 'arcade-skin';
 export default function ArkanoidPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pausedRef = useRef(false);
   const forceEndRef = useRef(false);
   const restartRef = useRef<(() => void) | null>(null);
+  const [skin, setSkin] = useState<SkinId>(() => {
+    if (typeof window === 'undefined') return 'clasico';
+    const stored = window.localStorage.getItem(
+      SKIN_STORAGE_KEY,
+    ) as SkinId | null;
+    return stored && stored in SKINS ? stored : 'clasico';
+  });
+  const skinRef = useRef<Palette>(SKINS[skin]);
   const router = useRouter();
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
@@ -18,6 +54,11 @@ export default function ArkanoidPage() {
   const [saved, setSaved] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState('');
+  const handleSkinChange = useCallback((next: SkinId) => {
+    setSkin(next);
+    skinRef.current = SKINS[next];
+    window.localStorage.setItem(SKIN_STORAGE_KEY, next);
+  }, []);
   const togglePause = useCallback(() => {
     setPaused((p) => {
       pausedRef.current = !p;
@@ -424,16 +465,16 @@ export default function ArkanoidPage() {
     }
     // ── Draw ─────────────────────────────────────────────────────────────────
     function drawOverlay(message: string) {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.fillStyle = skinRef.current.overlayBg;
       ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = '#fff';
+      ctx.fillStyle = skinRef.current.overlayText;
       ctx.font = 'bold 64px monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(message, W / 2, H / 2);
     }
     function draw() {
-      ctx.fillStyle = '#000';
+      ctx.fillStyle = skinRef.current.bg;
       ctx.fillRect(0, 0, W, H);
       for (const block of blocks) {
         if (block.alive)
@@ -463,7 +504,7 @@ export default function ArkanoidPage() {
       drawSprite(ctx, 'paddle', paddle.x, paddle.y, paddle.w, paddle.h);
       drawSprite(ctx, 'ball', ball.x, ball.y, ball.w, ball.h);
       if (gameState === 'playing') {
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = skinRef.current.hudText;
         ctx.font = 'bold 18px monospace';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'top';
@@ -552,7 +593,33 @@ export default function ArkanoidPage() {
         <span className="sr-only" aria-live="polite">
           Puntuación: {score}. Vidas: {lives}. Nivel: {level}.
         </span>
-        <div className="hud-actions">
+        <div className="hud-actions" style={{ alignItems: 'center' }}>
+          <select
+            className="btn ghost"
+            aria-label="Selector de skin"
+            value={skin}
+            onChange={(e) => {
+              handleSkinChange(e.target.value as SkinId);
+              e.target.blur();
+            }}
+            style={{
+              padding: '8px 10px',
+              fontSize: 8,
+              cursor: 'pointer',
+              color: 'var(--cyan)',
+              borderColor: 'var(--cyan)',
+            }}
+          >
+            {(['neon', 'retro', 'clasico'] as SkinId[]).map((id) => (
+              <option
+                key={id}
+                value={id}
+                style={{ background: 'var(--bg)', color: 'var(--ink)' }}
+              >
+                {id.toUpperCase()}
+              </option>
+            ))}
+          </select>
           <button className="btn yellow" onClick={togglePause}>
             {paused ? 'REANUDAR' : 'PAUSA'}
           </button>
