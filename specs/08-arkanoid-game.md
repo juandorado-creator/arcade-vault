@@ -1,7 +1,7 @@
 ---
 id: 08-arkanoid-game
 title: Juego Arkanoid
-state: aprobado
+state: implementado
 date: 2026-07-01
 depends_on: [06-data-infrastructure]
 objective: Portar el juego Arkanoid (canvas HTML5 vanilla, con assets de imagen/sonido y 5 niveles) a una página Next.js en /juegos/arkanoid, integrarlo al flujo de publicación de score y enlazarlo desde /biblioteca.
@@ -116,26 +116,26 @@ objective: Portar el juego Arkanoid (canvas HTML5 vanilla, con assets de imagen/
 
 ## Criterios de aceptación
 
-- [ ] `/juegos/arkanoid` carga sin errores de compilación ni de consola
-- [ ] El canvas 800×600 renderiza el juego (paleta, pelota, bloques) al entrar a la página
-- [ ] Los controles de teclado (←→ mover paleta) responden correctamente
-- [ ] La tecla P/Escape ya NO alterna pausa dentro del canvas — solo el botón PAUSA del HUD
-- [ ] El score, nivel y vidas se actualizan y se ven correctamente dibujados en el canvas
-- [ ] Al romper todos los bloques de un nivel, avanza al siguiente nivel (hasta 5)
-- [ ] Al completar el nivel 5 (`gameState === 'win'`), aparece el overlay de fin de partida
+- [x] `/juegos/arkanoid` carga sin errores de compilación ni de consola
+- [x] El canvas 800×600 renderiza el juego (paleta, pelota, bloques) al entrar a la página
+- [x] Los controles de teclado (←→ mover paleta) responden correctamente
+- [x] La tecla P/Escape ya NO alterna pausa dentro del canvas — solo el botón PAUSA del HUD
+- [x] El score, nivel y vidas se actualizan y se ven correctamente dibujados en el canvas
+- [x] Al romper todos los bloques de un nivel, avanza al siguiente nivel (hasta 5)
+- [x] Al completar el nivel 5 (`gameState === 'win'`), aparece el overlay de fin de partida
       con el score final, igual que en un Game Over real
-- [ ] Al perder todas las vidas, aparece el overlay de fin de partida con el score final correcto
-- [ ] El botón "Publicar score" está deshabilitado si el apodo está vacío
-- [ ] Al publicar un score válido (en win o en gameover), se inserta una fila en `scores` en Supabase
-- [ ] Tras publicar, el overlay muestra confirmación sin cerrarse
-- [ ] "Jugar de nuevo" reinicia la partida (nivel 1, score 0, vidas 3) sin recargar la página
-- [ ] El cleanup del `useEffect` cancela el RAF y remueve los listeners de teclado
-- [ ] El listener `mousemove` de control de paleta ya no existe en el código portado
-- [ ] En pantallas < 768px el canvas se oculta y aparece el aviso de escritorio
-- [ ] Los assets (spritesheet PNG, MP3s) se sirven desde `/arkanoid/...` en `public/` sin 404s
-- [ ] `/biblioteca` muestra la card de Arkanoid con nombre, descripción, cover propia
+- [x] Al perder todas las vidas, aparece el overlay de fin de partida con el score final correcto
+- [x] El botón "Publicar score" está deshabilitado si el apodo está vacío
+- [x] Al publicar un score válido (en win o en gameover), se inserta una fila en `scores` en Supabase
+- [x] Tras publicar, el overlay muestra confirmación sin cerrarse
+- [x] "Jugar de nuevo" reinicia la partida (nivel 1, score 0, vidas 3) sin recargar la página
+- [x] El cleanup del `useEffect` cancela el RAF y remueve los listeners de teclado
+- [x] El listener `mousemove` de control de paleta ya no existe en el código portado
+- [x] En pantallas < 768px el canvas se oculta y aparece el aviso de escritorio
+- [x] Los assets (spritesheet PNG, MP3s) se sirven desde `/arkanoid/...` en `public/` sin 404s
+- [x] `/biblioteca` muestra la card de Arkanoid con nombre, descripción, cover propia
       (`cover-ladrillos`) y enlace correctos
-- [ ] Los juegos de Asteroides y Tetris siguen funcionando (sin regresiones)
+- [x] Los juegos de Asteroides y Tetris siguen funcionando (sin regresiones)
 
 ## Decisiones tomadas y descartadas
 

@@ -357,20 +357,21 @@ export default function ArkanoidPage() {
         paddle.x = Math.min(W - paddle.w, paddle.x + PADDLE_SPEED * dt);
       ball.x += ball.vx * dt;
       ball.y += ball.vy * dt;
+      let bounced = false;
       if (ball.x <= 0) {
         ball.x = 0;
         ball.vx = Math.abs(ball.vx);
-        (bounceSound.cloneNode(true) as HTMLAudioElement).play();
+        bounced = true;
       }
       if (ball.x + ball.w >= W) {
         ball.x = W - ball.w;
         ball.vx = -Math.abs(ball.vx);
-        (bounceSound.cloneNode(true) as HTMLAudioElement).play();
+        bounced = true;
       }
       if (ball.y <= 0) {
         ball.y = 0;
         ball.vy = Math.abs(ball.vy);
-        (bounceSound.cloneNode(true) as HTMLAudioElement).play();
+        bounced = true;
       }
       if (
         ball.vy > 0 &&
@@ -381,8 +382,10 @@ export default function ArkanoidPage() {
       ) {
         ball.y = paddle.y - ball.h;
         ball.vy = -Math.abs(ball.vy);
-        (bounceSound.cloneNode(true) as HTMLAudioElement).play();
+        bounced = true;
       }
+      // Un solo bounceSound por frame, aunque coincidan varios rebotes (p. ej. esquina)
+      if (bounced) (bounceSound.cloneNode(true) as HTMLAudioElement).play();
       for (const block of blocks) {
         if (!block.alive) continue;
         if (collideAABB(block)) {
@@ -524,12 +527,19 @@ export default function ArkanoidPage() {
       initPaddle();
       loadLevel(1);
     }
+    let cancelled = false;
     loadSpritesheet(() => {
+      // El spritesheet carga de forma asíncrona (evento onload de <img>): si el
+      // efecto ya se desmontó (p. ej. doble-montaje de React StrictMode en dev)
+      // antes de que termine, no arrancamos un loop huérfano que seguiría
+      // sonando y sincronizando estado sobre el componente ya reemplazado.
+      if (cancelled) return;
       init();
       restartRef.current = init;
       rafId = requestAnimationFrame(loop);
     });
     return () => {
+      cancelled = true;
       cancelAnimationFrame(rafId);
       document.removeEventListener('keydown', onKeyDown);
       document.removeEventListener('keyup', onKeyUp);
